@@ -1,0 +1,26 @@
+{
+  "name": "pidash",
+  "version": "0.0.0",
+  "description": "simple pi dashboard",
+  "main": "webroot/index.html",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "browserify": "^13.1.0",
+    "gulp": "^3.9.1",
+    "gulp-sass": "^2.3.2",
+    "gulp-sourcemaps": "^1.6.0",
+    "gulp-uglify": "^1.5.4",
+    "gulp-util": "^3.0.7",
+    "vinyl-buffer": "^1.0.0",
+    "vinyl-source-stream": "^1.1.0"
+  },
+  "dependencies": {
+    "jquery": "^3.1.0",
+    "brfs": "1.4.3",
+    "request": "2.81.0"
+  }
+}

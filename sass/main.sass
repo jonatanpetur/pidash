@@ -1,0 +1,77 @@
+@import "weather-icons.scss"
+
+body
+  background: #000000
+  margin: 0
+
+.container
+  position: absolute
+  top: 0
+  left: 0
+  width: 1024px
+  height: 768px
+  background: #eeeeee
+
+.tab-bar
+  font-family: "Droid Sans", sans-serif
+  background: #FF9800
+  color: #FFFFFF
+  height: 10%
+  display: flex
+
+.tab-button
+  display: flex
+  flex-grow: 1
+  font-size: 35pt
+  text-align: center
+  align-items: center
+  justify-content: center
+
+.tab-button.active
+  background: rgba(255,255,255,0.1)
+
+.tab-button:hover
+  background: rgba(255,255,255,0.2)
+
+.tab-container
+  position: relative
+  height: 87%
+  margin: 0
+  padding: 1%
+
+.tab-content
+  height: 100%
+  display: flex
+  flex-direction: column
+
+#tab-control
+  display: none
+
+.row
+  display: flex
+  flex-direction: row
+  flex-grow: 1
+  margin-right: 10px
+  height: 50%
+
+.row:last-child
+  margin-bottom: 10px
+
+.widget
+  flex-grow: 1
+  background: #ffffff
+  margin: 10px 0 0 10px
+  box-shadow: #999999 0 2px 3px
+  color: #3c3c3c
+
+#widget-weather
+  flex-grow: 0
+  width: 250px
+
+#widget-weather .temperature
+  font-size: 3em
+  text-align: center
+
+.icon-container
+  display: flex
+  justify-content: center
