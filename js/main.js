@@ -6,7 +6,7 @@ var config = {
     "widgets": {
         "vasttrafik": {
             "updateInterval": 3000,
-            "apiSecret": "d2J1Q184cXQzSlJxWGVnanhCSzBRenVuUmZnYTpwZnNMWkJab0dCNkNYSERqRGJ2enB2cFowVDhh",
+            "apiSecret": "{{vasttrafik.secret}}",
             "apiTokenUrl": "https://api.vasttrafik.se:443/token",
             "apiBaseUrl": "https://api.vasttrafik.se/bin/rest.exe/v2",
             "stopId": "9021014007370000"

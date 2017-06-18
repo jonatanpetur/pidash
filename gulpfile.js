@@ -9,6 +9,7 @@ var buffer = require('vinyl-buffer');
 var uglify = require('gulp-uglify');
 var sourcemaps = require('gulp-sourcemaps');
 var gutil = require('gulp-util');
+var replace = require('gulp-token-replace');
 
 gulp.task('javascript', function () {
     // set up the browserify instance on a task basis
@@ -17,10 +18,13 @@ gulp.task('javascript', function () {
         debug: true
     });
 
+    var config = require('./configuration/secrets.json');
+
     return b.bundle()
         .pipe(source('./js/pidash.js'))
         .pipe(buffer())
         .pipe(sourcemaps.init({loadMaps: true}))
+	    .pipe(replace({global:config}))
         .pipe(uglify())
         .on('error', gutil.log)
         .pipe(sourcemaps.write('./'))

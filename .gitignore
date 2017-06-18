@@ -1,2 +1,7 @@
 node_modules/*
 .idea/
+dist/*
+node_modules/
+sass/partials/
+sass/vendor/
+webroot/js/
