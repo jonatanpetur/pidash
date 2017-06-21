@@ -12,9 +12,7 @@ var config = {
             "stopId": "9021014007370000"
         },
         "weather": {
-            "updateInterval": 3000,
-            "latitude": 57.70716,
-            "longtitude": 11.96679
+            "url": "https://www.yr.no/place/Sweden/V%C3%A4stra_G%C3%B6taland/Gothenburg/forecast_hour_by_hour.xml"
         }
     }
 };
@@ -102,6 +100,14 @@ $(function(){
         this.time = Object.time;
         this.track = Object.track;
         this.type = Object.types;
+
+        var d = new Date();
+        d.setYear(+Object.date.substr(0,4));
+        d.setMonth(+Object.date.substr(5,2) - 1);
+        d.setDate(+Object.date.substr(8,2));
+        d.setHours(+Object.time.substr(0,2), +Object.time.substr(3.2));
+
+        this.departureIn = Math.floor((d.getTime() - Date.now()) / (1000 * 60));
     };
 
     function padTen(i) {return i < 10 ? "0" + i : i;}
@@ -142,12 +148,34 @@ $(function(){
             {
                 var result = JSON.parse(body);
                 console.log(result);
-                var departure = new Departure(result.DepartureBoard.Departure[0]);
+                try{
+                    var departures = result.DepartureBoard.Departure.map(function(dep){return new Departure(dep)});
+                    console.log(departures);
+                }
+                catch(e)
+                {
+                    console.log("Couldn't parse DepartureBoard");
+                    console.log(e);
+                }
+
+
             }
 
-            state.widgets.vasttrafik.departures = [ departure ];
-            $('#widget-vasttrafik').append(renderDepartureLine(departure));
+            state.widgets.vasttrafik.departures = departures;
+            $('#widget-vasttrafik').append(renderDepartureBoard(departures));
         })
+    }
+
+    function renderDepartureBoard(departures)
+    {
+
+        var start = 0;
+        while(departures[start].departureIn <= 0){start++;}
+        var end = 5;
+        while(departures[end].departureIn < 60){end++;}
+        return $("<div class='departureboard'/>")
+            .append(renderBigDeparture(departures[start]))
+            .append( $("<div class='departure-table-container'/>").html($("<table class='departure-table' />").html(departures.slice(start+1, end).map(renderDepartureLine))));
     }
 
     /**
@@ -156,12 +184,19 @@ $(function(){
      */
     function renderDepartureLine(departure)
     {
-        var d = new Date();
+        return $("<tr class='departure-line'/>")
+                .append($("<td/>").html(departure.name))
+                .append($("<td/>").html(departure.direction))
+                .append($("<td/>").html(departure.departureIn));
+    }
 
-        d.setHours(departure.time.substr(0,2));
-        d.setMinutes(departure.time.substr(3.2));
-
-        return $("<div/>").html(departure.name + " leaving at: " + d);
+    /**
+     *
+     * @param Departure departure
+     */
+    function renderBigDeparture(departure)
+    {
+        return $("<div class='big-departure'/>").html(departure.departureIn );
     }
 
     function fetchVasttrafikToken()

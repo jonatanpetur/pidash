@@ -260,7 +260,7 @@ body {
 
 .tab-bar {
   font-family: "Droid Sans", sans-serif;
-  background: #FF9800;
+  background: #F44336;
   color: #FFFFFF;
   height: 10%;
   display: flex; }
@@ -321,5 +321,42 @@ body {
 .icon-container {
   display: flex;
   justify-content: center; }
+
+.departureboard {
+  display: flex;
+  flex-direction: row;
+  height: 97%;
+  font-family: "Droid Sans", monospace; }
+
+.big-departure {
+  height: 250px;
+  width: 250px;
+  margin: 20px;
+  border-radius: 250px;
+  background: #F44336;
+  float: left;
+  font-size: 130pt;
+  align-self: center;
+  line-height: 250px;
+  color: white; }
+
+.departure-table-container {
+  display: flex;
+  align-items: center;
+  width: 58%; }
+
+.departure-table {
+  margin: 10px;
+  font-size: 15pt; }
+
+.departure-table > tr > td:first-child {
+  width: 150px; }
+
+.departure-table > tr > td:nth-child(2) {
+  width: 200px; }
+
+.departure-table > tr > td:nth-child(3) {
+  text-align: right;
+  width: 90px; }
 
 /*# sourceMappingURL=main.css.map */
