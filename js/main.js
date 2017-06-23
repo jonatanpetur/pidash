@@ -5,11 +5,13 @@ var request = require('request');
 var config = {
     "widgets": {
         "vasttrafik": {
+            "lastUpdate": null,
             "updateInterval": 3000,
             "apiSecret": "{{vasttrafik.secret}}",
             "apiTokenUrl": "https://api.vasttrafik.se:443/token",
             "apiBaseUrl": "https://api.vasttrafik.se/bin/rest.exe/v2",
-            "stopId": "9021014007370000"
+            "stopId": "9021014007370000",
+            "bigDirections" : ["Östra Sjukhuset"]
         },
         "weather": {
             "url": "https://www.yr.no/place/Sweden/V%C3%A4stra_G%C3%B6taland/Gothenburg/forecast_hour_by_hour.xml"
@@ -112,12 +114,17 @@ $(function(){
 
     function padTen(i) {return i < 10 ? "0" + i : i;}
 
-    function updateVasttrafik(){
-        console.log("Updating Västtrafik");
+   function updateVasttrafik(){
+        console.log("Updating Västtrafik widget");
         var widgetConfig = config.widgets.vasttrafik;
-        var apiToken = state.widgets.vasttrafik.apiToken;
-        console.log("apitoken: " + apiToken);
+        var widgetState = state.widgets.vasttrafik;
 
+        if(widgetState.apiToken == null || (Date.now() - widgetState.lastUpdate) > (widgetState.apiTokenTTL * 1000) ){
+            fetchVasttrafikToken();
+            return;
+        }
+
+        var apiToken = state.widgets.vasttrafik.apiToken;
         // Get current date and time
         var d = new Date();
         var curDate = [ d.getFullYear(), padTen(d.getMonth()+1), padTen(d.getDate())].join("-");
@@ -147,60 +154,83 @@ $(function(){
             else
             {
                 var result = JSON.parse(body);
-                console.log(result);
                 try{
                     var departures = result.DepartureBoard.Departure.map(function(dep){return new Departure(dep)});
-                    console.log(departures);
                 }
                 catch(e)
                 {
                     console.log("Couldn't parse DepartureBoard");
                     console.log(e);
                 }
-
-
             }
 
             state.widgets.vasttrafik.departures = departures;
-            $('#widget-vasttrafik').append(renderDepartureBoard(departures));
+            $('#widget-vasttrafik').html(renderDepartureBoard(departures));
         })
     }
 
+    /***
+     *
+     * @param {Departure[]} departures
+     * @returns {*|jQuery}
+     */
     function renderDepartureBoard(departures)
     {
+        var widgetConfig = config.widgets.vasttrafik;
 
         var start = 0;
         while(departures[start].departureIn <= 0){start++;}
-        var end = 5;
-        while(departures[end].departureIn < 60){end++;}
+        var end = 19;
+
+        //while(departures[end].departureIn < 60){end++;}
+
+        var bigDeparture = departures.find(function(departure){
+            return widgetConfig.bigDirections.indexOf(departure.direction) != -1
+                && departure.departureIn < 60
+        });
+
+
         return $("<div class='departureboard'/>")
-            .append(renderBigDeparture(departures[start]))
-            .append( $("<div class='departure-table-container'/>").html($("<table class='departure-table' />").html(departures.slice(start+1, end).map(renderDepartureLine))));
+            .append(renderBigDeparture(bigDeparture))
+            .append( $("<div class='departure-table-container'/>")
+                .html($("<table class='departure-table' />")
+                    .html(departures.slice(start, end).map(renderDepartureLine))));
     }
 
-    /**
-     *
-     * @param Departure departure
-     */
     function renderDepartureLine(departure)
     {
         return $("<tr class='departure-line'/>")
                 .append($("<td/>").html(departure.name))
                 .append($("<td/>").html(departure.direction))
-                .append($("<td/>").html(departure.departureIn));
+                .append($("<td/>").html(formatMinutes(departure.departureIn)));
     }
 
-    /**
-     *
-     * @param Departure departure
-     */
+    function formatMinutes(minutes)
+    {
+        var hours = Math.floor( minutes / 60 );
+        return hours > 0 ? hours + ":" + padTen(minutes % 60): minutes;
+    }
+
     function renderBigDeparture(departure)
     {
-        return $("<div class='big-departure'/>").html(departure.departureIn );
+        return $("<div class='big-departure'/>").html(departure == null ? "<span class='light-muted'>?</span>" : departure.departureIn );
+    }
+
+    function getWeatherData()
+    {
+        var widgetConfig = config.widgets.weather;
+        request({
+            url: widgetConfig.url,
+            method: "GET"
+        }, function(error, response, body){
+            console.log(response);
+            console.log(body);
+        })
     }
 
     function fetchVasttrafikToken()
     {
+        console.log("Fetching token");
         var apiUrl = config.widgets.vasttrafik.apiTokenUrl;
         request({
             url: apiUrl,
@@ -215,8 +245,6 @@ $(function(){
             }
 
             var responseArray = JSON.parse(body);
-            console.log(responseArray['access_token']);
-
             var token = responseArray['access_token'];
             var ttl = responseArray['expires_in'];
             console.log("Setting token to: " + token);
@@ -226,5 +254,12 @@ $(function(){
         });
     }
 
-    fetchVasttrafikToken();
+    updateVasttrafik();
+    //setInterval(updateVasttrafik, 10000);
+    getWeatherData();
+    function updatePage(){
+        updateVasttrafik();
+
+    }
+
 });
